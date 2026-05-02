@@ -366,6 +366,24 @@
 
   .no-data { color: var(--sub); text-align: center; padding: 40px; font-size: 0.88rem; }
 
+  /* QUOTES */
+  .quote-list { display: flex; flex-direction: column; gap: 10px; }
+  .quote-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 4px;
+    padding: 14px 18px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  }
+  .quote-item:nth-child(2) { border-left-color: var(--accent4); }
+  .quote-item:nth-child(3) { border-left-color: var(--accent3); }
+  .quote-item:nth-child(4) { border-left-color: var(--navy); }
+  .quote-item:nth-child(5) { border-left-color: var(--purple); }
+  .quote-rank { font-size: 1rem; margin-bottom: 6px; }
+  .quote-text { font-size: 0.92rem; color: var(--text); line-height: 1.65; word-break: keep-all; font-weight: 700; }
+  .quote-author { font-size: 0.72rem; color: var(--sub); margin-top: 8px; font-weight: 700; }
+
   /* FOOTER */
   .footer {
     text-align: center;
@@ -569,12 +587,27 @@ function computeStatsFromMessages(msgs) {
   for (let i=0;i<24;i++) fullHour[String(i)]=hourData[String(i)]||0;
 
   const allDates = Object.keys(dateData).sort();
+
+  const isBoringMsg = (msg) => {
+    if (msg.length < 15 || msg.length > 100) return true;
+    if (/https?:\/\/|www\./i.test(msg)) return true;
+    if (!/[가-힣]/.test(msg)) return true;
+    const freq = {};
+    for (const c of msg) freq[c] = (freq[c]||0)+1;
+    if (Math.max(...Object.values(freq)) / msg.length > 0.4) return true;
+    return false;
+  };
+  const quotesPool = msgs
+    .filter(m => !isBoringMsg(m.msg))
+    .map(m => ({ user: m.user, msg: m.msg, date: m.date }));
+
   return {
     total_messages: msgs.length, total_users: users.length,
     date_range: { start: allDates[0], end: allDates[allDates.length-1] },
     users, date_data: dateData, hour_data: fullHour,
     weekday_data: {'0':wdData[0],'1':wdData[1],'2':wdData[2],'3':wdData[3],'4':wdData[4],'5':wdData[5],'6':wdData[6]},
     keyword_totals: kwTotals,
+    quotes_pool: quotesPool,
   };
 }
 
@@ -895,6 +928,17 @@ function render() {
       <div class="ranking-list">${rankItems}</div>
     </div>
 
+    <div class="section" id="sec-quotes">
+      <div class="section-header">
+        <div class="section-title">💬 이달의 명언 Top 5 <span>랜덤 선별</span></div>
+        <div style="display:flex;gap:6px">
+          <button class="dl-btn" onclick="reshuffleQuotes()">🔀 다시 뽑기</button>
+          <button class="dl-btn" onclick="downloadSection('sec-quotes', '강남벙_명언_${period}.png')">📥 이미지 저장</button>
+        </div>
+      </div>
+      <div id="quotesList">${renderQuotesList(pickQuotes())}</div>
+    </div>
+
     <div class="section" id="sec-stats">
       <div class="section-header">
         <div class="section-title">📊 채팅 통계</div>
@@ -917,6 +961,33 @@ function render() {
       </div>
     </div>
   `;
+}
+
+function pickQuotes() {
+  const pool = (RAW.quotes_pool || []).filter(q => q.date >= currentStart && q.date <= currentEnd);
+  const shuffled = [...pool].sort(() => Math.random() - 0.5);
+  const seen = new Set();
+  const result = [];
+  for (const q of shuffled) {
+    if (result.length >= 5) break;
+    if (!seen.has(q.msg)) { seen.add(q.msg); result.push(q); }
+  }
+  return result;
+}
+
+function renderQuotesList(quotes) {
+  if (!quotes || quotes.length === 0) return '<div class="no-data">해당 기간에 명언 후보가 없어요</div>';
+  const medals = ['🥇','🥈','🥉','4️⃣','5️⃣'];
+  return `<div class="quote-list">${quotes.map((q,i) => `
+    <div class="quote-item">
+      <div class="quote-rank">${medals[i]}</div>
+      <div class="quote-text">"${q.msg}"</div>
+      <div class="quote-author">— ${q.user}&nbsp;&nbsp;·&nbsp;&nbsp;${q.date}</div>
+    </div>`).join('')}</div>`;
+}
+
+function reshuffleQuotes() {
+  document.getElementById('quotesList').innerHTML = renderQuotesList(pickQuotes());
 }
 
 function setPreset(p) {
