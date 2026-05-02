@@ -762,23 +762,29 @@ function render() {
     weekend: topBy('weekend'),
     early:   topBy('early'),
     active:  topBy('active_days'),
-    lunch:   [...users].filter(u => u.peak_hour === 12 || u.peak_hour === 13).sort((a,b) => b.total - a.total)[0],
-    dawn:    [...users].filter(u => u.peak_hour >= 0 && u.peak_hour <= 6).sort((a,b) => b.total - a.total)[0],
+    lunch:    [...users].filter(u => u.peak_hour === 12 || u.peak_hour === 13).sort((a,b) => b.total - a.total)[0],
+    dawn:     [...users].filter(u => u.peak_hour >= 0 && u.peak_hour <= 6).sort((a,b) => b.total - a.total)[0],
+    allround: [...users].sort((a,b) => (b.drink+b.food+b.meet+b.board+b.movie) - (a.drink+a.food+a.meet+a.board+a.movie))[0],
+    evening:  [...users].filter(u => u.peak_hour >= 17 && u.peak_hour <= 20).sort((a,b) => b.total - a.total)[0],
   };
   const badges = [
-    {emoji:'💬', title:'수다의 제왕',      name: users[0]?.name,    desc:`총 ${(users[0]?.total||0).toLocaleString()}개 메시지`},
-    {emoji:'🍻', title:'술자리 소환사',    name: w.drink?.name,     desc:`술 언급 ${w.drink?.drink||0}회`},
-    {emoji:'🍽️', title:'맛집 탐정',       name: w.food?.name,      desc:`음식 언급 ${w.food?.food||0}회`},
-    {emoji:'⚡',  title:'번개의 신',       name: w.meet?.name,      desc:`모임 제안 ${w.meet?.meet||0}회`},
-    {emoji:'🦉', title:'강남 올빼미',      name: w.night?.name,     desc:`새벽(0~5시) 메시지 ${w.night?.night||0}개`},
-    {emoji:'🎲', title:'보드게임 전도사',  name: w.board?.name,     desc:`보드게임 언급 ${w.board?.board||0}회`},
-    {emoji:'🎬', title:'시네마 천국',      name: w.movie?.name,     desc:`영화 언급 ${w.movie?.movie||0}회`},
-    {emoji:'📅', title:'주말 불꽃러',      name: w.weekend?.name,   desc:`주말 메시지 ${w.weekend?.weekend||0}개`},
-    {emoji:'🌅', title:'모닝 수다왕',      name: w.early?.name,     desc:`아침(6~8시) 메시지 ${w.early?.early||0}개`},
+    // 1열
+    {emoji:'💬', title:'수다의 제왕',      name: users[0]?.name,       desc:`총 ${(users[0]?.total||0).toLocaleString()}개 메시지`},
+    {emoji:'⚡',  title:'번개의 신',       name: w.meet?.name,         desc:`모임 제안 ${w.meet?.meet||0}회`},
+    {emoji:'🎯', title:'만능 참여러',      name: w.allround?.name,     desc:`술·밥·번개·게임·영화 합산 ${((w.allround?.drink||0)+(w.allround?.food||0)+(w.allround?.meet||0)+(w.allround?.board||0)+(w.allround?.movie||0))}회`},
+    {emoji:'🍻', title:'술자리 소환사',    name: w.drink?.name,        desc:`술 언급 ${w.drink?.drink||0}회`},
+    // 2열~
+    {emoji:'🍽️', title:'맛집 탐정',       name: w.food?.name,         desc:`음식 언급 ${w.food?.food||0}회`},
+    {emoji:'🦉', title:'강남 올빼미',      name: w.night?.name,        desc:`새벽(0~5시) 메시지 ${w.night?.night||0}개`},
+    {emoji:'🎲', title:'보드게임 전도사',  name: w.board?.name,        desc:`보드게임 언급 ${w.board?.board||0}회`},
+    {emoji:'🎬', title:'시네마 천국',      name: w.movie?.name,        desc:`영화 언급 ${w.movie?.movie||0}회`},
+    {emoji:'📅', title:'주말 불꽃러',      name: w.weekend?.name,      desc:`주말 메시지 ${w.weekend?.weekend||0}개`},
+    {emoji:'🌅', title:'모닝 수다왕',      name: w.early?.name,        desc:`아침(6~8시) 메시지 ${w.early?.early||0}개`},
     {emoji:'🫥', title:'신비주의 멤버',    name: [...users].sort((a,b)=>a.total-b.total).find(u=>u.total>0)?.name, desc:`조용한 관망파`},
-    {emoji:'🔥', title:'개근왕',           name: w.active?.name,    desc:`${w.active?.active_days||0}일 개근`},
-    {emoji:'🍱', title:'점심시간 수다왕',  name: w.lunch?.name,     desc:`점심(12~13시) 활동 집중형`},
-    {emoji:'🦇', title:'새벽 귀신',        name: w.dawn?.name,      desc:`주 활동시간 새벽 ${w.dawn?.peak_hour||0}시`},
+    {emoji:'🔥', title:'개근왕',           name: w.active?.name,       desc:`${w.active?.active_days||0}일 개근`},
+    {emoji:'🍱', title:'점심시간 수다왕',  name: w.lunch?.name,        desc:`점심(12~13시) 활동 집중형`},
+    {emoji:'🦇', title:'새벽 귀신',        name: w.dawn?.name,         desc:`주 활동시간 새벽 ${w.dawn?.peak_hour||0}시`},
+    {emoji:'🌆', title:'퇴근 후 수다왕',   name: w.evening?.name,      desc:`퇴근(17~20시) 활동 집중형`},
   ];
 
   const hourMax = Math.max(...Object.values(RAW.hour_data));
