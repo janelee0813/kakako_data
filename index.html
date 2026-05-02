@@ -448,6 +448,16 @@
     transition: all 0.15s;
   }
   .modal-close:hover { background: var(--red); border-color: var(--red); color: #fff; }
+  .modal-dl-btn {
+    position: absolute; top: 16px; right: 54px;
+    background: var(--card2); border: 1px solid var(--border);
+    color: var(--sub); padding: 5px 10px;
+    border-radius: 4px; cursor: pointer;
+    font-size: 0.72rem; font-weight: 800;
+    font-family: 'Nanum Gothic', sans-serif;
+    transition: all 0.15s; white-space: nowrap;
+  }
+  .modal-dl-btn:hover { background: var(--navy); border-color: var(--navy); color: #fff; }
   .profile-header { margin-bottom: 18px; padding-bottom: 16px; border-bottom: 2px solid var(--border); }
   .profile-name { font-weight: 800; font-size: 1.15rem; color: var(--text); word-break: keep-all; }
   .profile-meta { font-size: 0.78rem; color: var(--sub); margin-top: 5px; font-weight: 700; }
@@ -609,6 +619,7 @@
 <div class="user-modal" id="userModal">
   <div class="modal-backdrop" onclick="closeUserModal()"></div>
   <div class="modal-card">
+    <button class="modal-dl-btn" onclick="downloadProfileCard()">📥 이미지 저장</button>
     <button class="modal-close" onclick="closeUserModal()">✕</button>
     <div id="userModalContent"></div>
   </div>
@@ -1220,6 +1231,33 @@ function openUserProfile(name) {
 
 function closeUserModal() {
   document.getElementById('userModal').classList.remove('open');
+}
+
+async function downloadProfileCard() {
+  const card = document.querySelector('.modal-card');
+  const closeBtn = card.querySelector('.modal-close');
+  const dlBtn = card.querySelector('.modal-dl-btn');
+  closeBtn.style.visibility = 'hidden';
+  dlBtn.style.visibility = 'hidden';
+  const origMaxHeight = card.style.maxHeight;
+  const origOverflow = card.style.overflowY;
+  card.style.maxHeight = 'none';
+  card.style.overflowY = 'visible';
+  try {
+    const canvas = await html2canvas(card, {
+      backgroundColor: '#ffffff', scale: 2, useCORS: true, logging: false,
+    });
+    const name = document.querySelector('.profile-name')?.firstChild?.textContent?.trim() || '멤버';
+    const link = document.createElement('a');
+    link.download = `강남벙_${name}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  } finally {
+    card.style.maxHeight = origMaxHeight;
+    card.style.overflowY = origOverflow;
+    closeBtn.style.visibility = '';
+    dlBtn.style.visibility = '';
+  }
 }
 
 document.addEventListener('keydown', e => { if (e.key==='Escape') closeUserModal(); });
