@@ -764,10 +764,8 @@ function render() {
     weekend: topBy('weekend'),
     active:  topBy('active_days'),
     morning:  [...users].filter(u => u.peak_hour >= 6 && u.peak_hour <= 11).sort((a,b) => b.total - a.total)[0],
-    lunch:    [...users].filter(u => u.peak_hour === 12 || u.peak_hour === 13).sort((a,b) => b.total - a.total)[0],
     dawn:     [...users].filter(u => u.peak_hour >= 0 && u.peak_hour <= 6).sort((a,b) => b.total - a.total)[0],
     allround: [...users].sort((a,b) => (b.drink+b.food+b.meet+b.board+b.movie) - (a.drink+a.food+a.meet+a.board+a.movie))[0],
-    evening:  [...users].filter(u => u.peak_hour >= 17 && u.peak_hour <= 20).sort((a,b) => b.total - a.total)[0],
   };
   const badges = [
     // 1열
@@ -783,9 +781,7 @@ function render() {
     {emoji:'🌅', title:'모닝 수다왕',      name: w.morning?.name,      desc:`주 활동시간 오전 ${w.morning?.peak_hour||0}시`},
     {emoji:'🫥', title:'신비주의 멤버',    name: [...users].sort((a,b)=>a.total-b.total).find(u=>u.total>0)?.name, desc:`조용한 관망파`},
     {emoji:'🔥', title:'개근왕',           name: w.active?.name,       desc:`${w.active?.active_days||0}일 개근`},
-    {emoji:'🍱', title:'점심시간 수다왕',  name: w.lunch?.name,        desc:`점심(12~13시) 활동 집중형`},
     {emoji:'🦇', title:'새벽 귀신',        name: w.dawn?.name,         desc:`주 활동시간 새벽 ${w.dawn?.peak_hour||0}시`},
-    {emoji:'🌆', title:'퇴근 후 수다왕',   name: w.evening?.name,      desc:`퇴근(17~20시) 활동 집중형`},
   ];
 
   const hourMax = Math.max(...Object.values(RAW.hour_data));
