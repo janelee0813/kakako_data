@@ -763,6 +763,7 @@ function render() {
     early:   topBy('early'),
     active:  topBy('active_days'),
     lunch:   [...users].filter(u => u.peak_hour === 12 || u.peak_hour === 13).sort((a,b) => b.total - a.total)[0],
+    dawn:    [...users].filter(u => u.peak_hour >= 0 && u.peak_hour <= 6).sort((a,b) => b.total - a.total)[0],
   };
   const badges = [
     {emoji:'💬', title:'수다의 제왕',      name: users[0]?.name,    desc:`총 ${(users[0]?.total||0).toLocaleString()}개 메시지`},
@@ -777,6 +778,7 @@ function render() {
     {emoji:'🫥', title:'신비주의 멤버',    name: [...users].sort((a,b)=>a.total-b.total).find(u=>u.total>0)?.name, desc:`조용한 관망파`},
     {emoji:'🔥', title:'개근왕',           name: w.active?.name,    desc:`${w.active?.active_days||0}일 개근`},
     {emoji:'🍱', title:'점심시간 수다왕',  name: w.lunch?.name,     desc:`점심(12~13시) 활동 집중형`},
+    {emoji:'🦇', title:'새벽 귀신',        name: w.dawn?.name,      desc:`주 활동시간 새벽 ${w.dawn?.peak_hour||0}시`},
   ];
 
   const hourMax = Math.max(...Object.values(RAW.hour_data));
