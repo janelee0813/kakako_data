@@ -335,24 +335,6 @@
   @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
   .two-col .section { margin-bottom: 0; }
 
-  /* CHARACTER */
-  .character-card {
-    background: linear-gradient(135deg, #fff5f0, #f8f0ff);
-    border: 1.5px solid var(--accent);
-    border-radius: 16px;
-    padding: 24px;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(232,92,31,0.08);
-  }
-  .character-emoji { font-size: 3rem; margin-bottom: 12px; }
-  .character-title {
-    font-family: 'Black Han Sans', sans-serif;
-    font-size: 1.3rem;
-    color: var(--accent);
-    margin-bottom: 8px;
-  }
-  .character-desc { color: var(--sub); font-size: 0.85rem; line-height: 1.6; word-break: keep-all; }
-
   /* LEVEL BADGE */
   .level-badge {
     display: inline-block;
@@ -474,14 +456,6 @@ function getLevel(total) {
   return {label:'🥉 브론즈', cls:'lv-bronze'};
 }
 
-function getCharacter(data) {
-  const {total, kw, wdCount} = data;
-  const drinkRatio = kw.drink / Math.max(total,1);
-  if (drinkRatio > 0.015) return {emoji:'🍻', title:'이 채팅방은 술을 사랑하는 사람들의 모임!', desc:'맥주, 소주, 이자카야… 술 얘기가 끊이질 않는 강남 최고의 주당 집합소. 퇴근 후 자연스럽게 "오늘 한잔?" 이 나오는 곳.'};
-  if (kw.food > kw.drink * 2) return {emoji:'🍽️', title:'강남 맛집 데이터베이스 채팅방', desc:'밥 얘기, 식당 얘기, 맛집 추천이 넘쳐나는 곳. 여기 멤버들한테 물어보면 강남 맛집 다 나온다는 소문이 있음.'};
-  return {emoji:'🔥', title:'강남에서 제일 핫한 모임 채팅방', desc:'번개, 벙개, 모임 제안이 수시로 올라오는 활발한 채팅방. 심심한 날에 여기 들어오면 뭔가 생긴다는 진리.'};
-}
-
 async function downloadSection(id, filename) {
   const el = document.getElementById(id);
   if (!el) return;
@@ -509,7 +483,6 @@ function render() {
   const dateKeys = Object.keys(dateData).sort();
   const maxDate = Math.max(...Object.values(dateData));
   const hotDays = [...Object.entries(dateData)].sort((a,b)=>b[1]-a[1]).slice(0,3);
-  const char = getCharacter(data);
   const period = `${currentStart.replace(/-/g,'')}_${currentEnd.replace(/-/g,'')}`;
 
   const sortBy = (key) => [...users].sort((a,b) => b[key] - a[key]);
@@ -710,18 +683,6 @@ function render() {
       <div class="chart-card">
         <div class="bar-chart" style="height:140px">${dateBars}</div>
         <div style="margin-top:8px;font-size:0.72rem;color:var(--sub);text-align:center">🟡 주말&nbsp;&nbsp;🔵 평일&nbsp;&nbsp;(막대에 마우스 올리면 날짜 표시)</div>
-      </div>
-    </div>
-
-    <div class="section" id="sec-char">
-      <div class="section-header">
-        <div class="section-title">🎭 이 채팅방의 캐릭터</div>
-        <button class="dl-btn" onclick="downloadSection('sec-char', '강남벙_캐릭터_${period}.png')">📥 이미지 저장</button>
-      </div>
-      <div class="character-card">
-        <div class="character-emoji">${char.emoji}</div>
-        <div class="character-title">${char.title}</div>
-        <div class="character-desc">${char.desc}</div>
       </div>
     </div>
   `;
