@@ -552,6 +552,7 @@ function kwCount(msg, list) { return list.some(w => msg.includes(w)) ? 1 : 0; }
 function computeStatsFromMessages(msgs) {
   const uMap = {}, dateData = {}, hourData = {}, wdData = {0:0,1:0,2:0,3:0,4:0,5:0,6:0};
   const kwTotals = {drink:0,food:0,meet:0,board:0,movie:0};
+  const tagsGiven = {};
 
   for (const {date, hour, user, msg} of msgs) {
     dateData[date] = (dateData[date]||0) + 1;
@@ -574,7 +575,25 @@ function computeStatsFromMessages(msgs) {
     kwTotals.drink+=kwCount(msg,DRINK_KW); kwTotals.food+=kwCount(msg,FOOD_KW);
     kwTotals.meet+=kwCount(msg,MEET_KW);   kwTotals.board+=kwCount(msg,BOARD_KW);
     kwTotals.movie+=kwCount(msg,MOVIE_KW);
+    const atCount = (msg.match(/@/g)||[]).length;
+    if (atCount > 0) tagsGiven[user] = (tagsGiven[user]||0) + atCount;
   }
+
+  // 태그받은 횟수: 알려진 이름이 @뒤에 등장하는지 검색
+  const tagsReceived = {};
+  const allNames = Object.keys(uMap);
+  for (const {msg} of msgs) {
+    if (!msg.includes('@')) continue;
+    for (const name of allNames) {
+      if (msg.includes('@' + name)) tagsReceived[name] = (tagsReceived[name]||0) + 1;
+    }
+  }
+  const topTaggerEntry = Object.entries(tagsGiven).sort((a,b)=>b[1]-a[1])[0];
+  const topTaggedEntry = Object.entries(tagsReceived).sort((a,b)=>b[1]-a[1])[0];
+  const tagStats = {
+    top_tagger: topTaggerEntry ? {name:topTaggerEntry[0], count:topTaggerEntry[1]} : null,
+    top_tagged: topTaggedEntry ? {name:topTaggedEntry[0], count:topTaggedEntry[1]} : null,
+  };
 
   const users = Object.values(uMap).map(u => {
     const pe = Object.entries(u.ph).sort((a,b)=>b[1]-a[1])[0];
@@ -608,6 +627,7 @@ function computeStatsFromMessages(msgs) {
     weekday_data: {'0':wdData[0],'1':wdData[1],'2':wdData[2],'3':wdData[3],'4':wdData[4],'5':wdData[5],'6':wdData[6]},
     keyword_totals: kwTotals,
     quotes_pool: quotesPool,
+    tag_stats: tagStats,
   };
 }
 
@@ -815,6 +835,8 @@ function render() {
     {emoji:'🫥', title:'신비주의 멤버',    name: [...users].sort((a,b)=>a.total-b.total).find(u=>u.total>0)?.name, desc:`조용한 관망파`},
     {emoji:'🔥', title:'개근왕',           name: w.active?.name,       desc:`${w.active?.active_days||0}일 개근`},
     {emoji:'🦇', title:'새벽 귀신',        name: w.dawn?.name,         desc:`주 활동시간 새벽 ${w.dawn?.peak_hour||0}시`},
+    {emoji:'📣', title:'태그 받은 왕',     name: RAW.tag_stats?.top_tagged?.name,  desc:`${RAW.tag_stats?.top_tagged?.count||0}번 태그됨`},
+    {emoji:'🔔', title:'태그 마스터',      name: RAW.tag_stats?.top_tagger?.name,  desc:`${RAW.tag_stats?.top_tagger?.count||0}번 태그함`},
   ];
 
   const wdNames = ['월','화','수','목','금','토','일'];
