@@ -771,7 +771,7 @@ function render() {
     {emoji:'🎲', title:'보드게임 전도사',name: w.board?.name,   desc:`보드게임 언급 ${w.board?.board||0}회`},
     {emoji:'🎬', title:'시네마 천국',    name: w.movie?.name,   desc:`영화 언급 ${w.movie?.movie||0}회`},
     {emoji:'📅', title:'주말 불꽃러',    name: w.weekend?.name, desc:`주말 메시지 ${w.weekend?.weekend||0}개`},
-    {emoji:'🌅', title:'강남 얼리버드', name: w.early?.name,   desc:`아침(6~8시) 메시지 ${w.early?.early||0}개`},
+    {emoji:'🌅', title:'모닝 수다왕', name: w.early?.name,   desc:`아침(6~8시) 메시지 ${w.early?.early||0}개`},
     {emoji:'🫥', title:'신비주의 멤버', name: [...users].sort((a,b)=>a.total-b.total).find(u=>u.total>0)?.name, desc:`조용한 관망파`},
     {emoji:'✍️', title:'글쟁이',        name: [...users].filter(u=>u.avg_len<1000&&u.avg_len>0).sort((a,b)=>b.avg_len-a.avg_len)[0]?.name, desc:`평균 ${[...users].filter(u=>u.avg_len<1000&&u.avg_len>0).sort((a,b)=>b.avg_len-a.avg_len)[0]?.avg_len}자`},
     {emoji:'⚡',  title:'단문의 달인',  name: [...users].filter(u=>u.total>50&&u.avg_len>0).sort((a,b)=>a.avg_len-b.avg_len)[0]?.name, desc:`평균 ${[...users].filter(u=>u.total>50&&u.avg_len>0).sort((a,b)=>a.avg_len-b.avg_len)[0]?.avg_len}자`},
