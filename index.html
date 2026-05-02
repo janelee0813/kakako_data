@@ -419,6 +419,25 @@
   .upload-status { font-size: 0.8rem; font-weight: 800; white-space: nowrap; }
   .upload-status.ok { color: var(--accent3); }
   .upload-status.err { color: var(--red); }
+
+  /* EMPTY STATE */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 20px;
+    text-align: center;
+  }
+  .empty-icon { font-size: 3.5rem; margin-bottom: 20px; opacity: 0.4; }
+  .empty-title {
+    font-family: 'Nanum Gothic', sans-serif;
+    font-weight: 800;
+    font-size: 1.2rem;
+    color: var(--sub);
+    margin-bottom: 10px;
+  }
+  .empty-desc { font-size: 0.85rem; color: var(--sub); opacity: 0.7; line-height: 1.7; }
 </style>
 </head>
 <body>
@@ -441,18 +460,15 @@
   <div class="upload-status" id="uploadStatus"></div>
 </div>
 
-<div class="filter-bar">
+<div class="filter-bar" id="filterBar" style="display:none">
   <span class="filter-label">📅 기간 선택</span>
   <button class="preset-btn" onclick="setPreset('all')">전체기간</button>
   <button class="preset-btn" onclick="setPreset('last7')">최근 7일</button>
   <button class="preset-btn" onclick="setPreset('last30')">최근 30일</button>
-  <button class="preset-btn" onclick="setPreset('feb')">2월</button>
-  <button class="preset-btn" onclick="setPreset('mar')">3월</button>
-  <button class="preset-btn" onclick="setPreset('apr')">4월</button>
   <div class="date-inputs">
-    <input type="date" id="startDate" value="2026-02-20" min="2026-02-20" max="2026-05-02">
-    <span style="color:var(--sub)">~</span>
-    <input type="date" id="endDate" value="2026-05-02" min="2026-02-20" max="2026-05-02">
+    <input type="date" id="startDate">
+    <span style="color:rgba(255,255,255,0.4)">~</span>
+    <input type="date" id="endDate">
     <button class="apply-btn" onclick="applyFilter()">적용</button>
   </div>
 </div>
@@ -616,6 +632,7 @@ function handleCSV(file) {
       document.getElementById('endDate').value   = currentEnd;
       document.querySelector('.header-sub').textContent =
         `${currentStart} ~ ${currentEnd} | ${newData.total_users}명 | ${newData.total_messages.toLocaleString()}개 메시지`;
+      document.getElementById('filterBar').style.display = '';
       render();
 
       zone.className = 'upload-zone done';
@@ -950,9 +967,6 @@ function setPreset(p) {
     const d = new Date(last); d.setDate(d.getDate()-29);
     currentStart = d.toISOString().slice(0,10); currentEnd=last;
   }
-  else if (p==='feb') { currentStart='2026-02-20'; currentEnd='2026-02-28'; }
-  else if (p==='mar') { currentStart='2026-03-01'; currentEnd='2026-03-31'; }
-  else if (p==='apr') { currentStart='2026-04-01'; currentEnd='2026-04-30'; }
   document.getElementById('startDate').value = currentStart;
   document.getElementById('endDate').value = currentEnd;
   render();
@@ -966,7 +980,14 @@ function applyFilter() {
   render();
 }
 
-render();
+// 초기 빈 화면
+document.getElementById('mainContent').innerHTML = `
+  <div class="empty-state">
+    <div class="empty-icon">📊</div>
+    <div class="empty-title">CSV 파일을 업로드하면 분석이 시작됩니다</div>
+    <div class="empty-desc">상단 업로드 영역에 채팅 데이터 파일을 드래그하거나 클릭해서 첨부해주세요.<br>필수 컬럼: 날짜 · 시간 · 이름 · 메시지</div>
+  </div>
+`;
 </script>
 </body>
 </html>
