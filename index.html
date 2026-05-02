@@ -236,6 +236,9 @@
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   }
   .badge-card:hover { border-color: var(--accent); box-shadow: 0 3px 8px rgba(196,74,14,0.12); }
+  .badge-empty { opacity: 0.45; }
+  .badge-empty:hover { border-color: var(--border); box-shadow: none; }
+  .badge-none { color: var(--sub) !important; font-weight: 400 !important; font-size: 0.78rem !important; }
   .badge-emoji { font-size: 1.8rem; flex-shrink: 0; }
   .badge-info {}
   .badge-title { font-size: 0.72rem; color: var(--sub); font-weight: 700; letter-spacing: 0.3px; }
@@ -760,7 +763,7 @@ function render() {
     movie:   topBy('movie'),
     weekend: topBy('weekend'),
     active:  topBy('active_days'),
-    morning:  [...users].filter(u => u.peak_hour >= 6 && u.peak_hour <= 9).sort((a,b) => b.total - a.total)[0],
+    morning:  [...users].filter(u => u.peak_hour >= 6 && u.peak_hour <= 11).sort((a,b) => b.total - a.total)[0],
     lunch:    [...users].filter(u => u.peak_hour === 12 || u.peak_hour === 13).sort((a,b) => b.total - a.total)[0],
     dawn:     [...users].filter(u => u.peak_hour >= 0 && u.peak_hour <= 6).sort((a,b) => b.total - a.total)[0],
     allround: [...users].sort((a,b) => (b.drink+b.food+b.meet+b.board+b.movie) - (a.drink+a.food+a.meet+a.board+a.movie))[0],
@@ -901,14 +904,13 @@ function render() {
         <button class="dl-btn" onclick="downloadSection('sec-badge', '강남벙_뱃지_${period}.png')">📥 이미지 저장</button>
       </div>
       <div class="badge-grid">
-        ${badges.map(b => b.name ? `<div class="badge-card">
+        ${badges.map(b => `<div class="badge-card${b.name ? '' : ' badge-empty'}">
           <div class="badge-emoji">${b.emoji}</div>
           <div class="badge-info">
             <div class="badge-title">${b.title}</div>
-            <div class="badge-name">${b.name}</div>
-            <div class="badge-desc">${b.desc}</div>
+            ${b.name ? `<div class="badge-name">${b.name}</div><div class="badge-desc">${b.desc}</div>` : `<div class="badge-name badge-none">해당없음</div>`}
           </div>
-        </div>` : '').join('')}
+        </div>`).join('')}
       </div>
     </div>
 
