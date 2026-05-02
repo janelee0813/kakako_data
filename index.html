@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🍻 강남벙 채팅 분석기</title>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<style>
+  :root {
+    --bg: #f5f5fa;
+    --card: #ffffff;
+    --card2: #eeeef8;
+    --border: #dddde8;
+    --accent: #e85c1f;
+    --accent2: #b87d00;
+    --accent3: #00a878;
+    --accent4: #0e72a0;
+    --text: #1a1a2e;
+    --sub: #6b6b8a;
+    --red: #d63060;
+    --purple: #7b3fcd;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Noto Sans KR', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* HEADER */
+  .header {
+    background: linear-gradient(135deg, #fff8f5 0%, #fef0ff 40%, #f0f5ff 100%);
+    padding: 32px 24px 24px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -60px; left: 50%;
+    transform: translateX(-50%);
+    width: 400px; height: 200px;
+    background: radial-gradient(ellipse, rgba(232,92,31,0.08) 0%, transparent 70%);
+  }
+  .header-title {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 2.2rem;
+    letter-spacing: -1px;
+    background: linear-gradient(135deg, #e85c1f, #b87d00, #e85c1f);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    position: relative;
+  }
+  .header-sub {
+    color: var(--sub);
+    font-size: 0.85rem;
+    margin-top: 6px;
+    position: relative;
+  }
+
+  /* DATE FILTER */
+  .filter-bar {
+    background: var(--card);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    justify-content: center;
+  }
+  .filter-label { color: var(--sub); font-size: 0.8rem; font-weight: 700; letter-spacing: 1px; }
+  .preset-btn {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Noto Sans KR', sans-serif;
+  }
+  .preset-btn:hover, .preset-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+  }
+  .date-inputs {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+  .date-inputs input[type="date"] {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 7px 12px;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-family: 'Noto Sans KR', sans-serif;
+    outline: none;
+    cursor: pointer;
+  }
+  .date-inputs input:focus { border-color: var(--accent); }
+  .apply-btn {
+    background: var(--accent);
+    border: none;
+    color: #fff;
+    padding: 8px 18px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: opacity 0.2s;
+  }
+  .apply-btn:hover { opacity: 0.85; }
+
+  /* MAIN */
+  .main { max-width: 1100px; margin: 0 auto; padding: 24px 20px 60px; }
+
+  /* PERIOD TITLE */
+  .period-title {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .period-title h2 {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 1.5rem;
+    color: var(--accent2);
+  }
+  .period-title p { color: var(--sub); font-size: 0.85rem; margin-top: 4px; }
+
+  /* STAT CARDS */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+  @media (max-width: 700px) { .stat-grid { grid-template-columns: repeat(2, 1fr); } }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 18px 16px;
+    text-align: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  }
+  .stat-icon { font-size: 1.8rem; margin-bottom: 8px; }
+  .stat-value {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 1.8rem;
+    color: var(--accent);
+    line-height: 1;
+  }
+  .stat-label { color: var(--sub); font-size: 0.75rem; margin-top: 4px; }
+
+  /* SECTION */
+  .section { margin-bottom: 32px; }
+  .section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+  .section-title {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-title span { color: var(--sub); font-size: 0.8rem; font-family: 'Noto Sans KR', sans-serif; font-weight: 400; }
+
+  /* DOWNLOAD BUTTON */
+  .dl-btn {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    color: var(--sub);
+    padding: 5px 12px;
+    border-radius: 14px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: 'Noto Sans KR', sans-serif;
+    transition: all 0.2s;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  .dl-btn:hover { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* BADGE SECTION */
+  .badge-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 12px;
+  }
+  .badge-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: transform 0.2s, border-color 0.2s;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .badge-card:hover { transform: translateY(-2px); border-color: var(--accent); }
+  .badge-emoji { font-size: 2rem; flex-shrink: 0; }
+  .badge-info {}
+  .badge-title { font-size: 0.78rem; color: var(--sub); }
+  .badge-name { font-weight: 700; font-size: 0.95rem; color: var(--text); margin-top: 2px; word-break: keep-all; }
+  .badge-desc { font-size: 0.72rem; color: var(--accent2); margin-top: 2px; }
+
+  /* RANKING */
+  .ranking-list { display: flex; flex-direction: column; gap: 8px; }
+  .rank-item {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+  }
+  .rank-num {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 1.1rem;
+    width: 28px;
+    text-align: center;
+    flex-shrink: 0;
+  }
+  .rank-1 { color: #b87d00; }
+  .rank-2 { color: #7070a0; }
+  .rank-3 { color: #a06028; }
+  .rank-4, .rank-5 { color: var(--sub); font-size: 0.9rem; }
+  .rank-name { flex: 1; font-weight: 500; font-size: 0.9rem; word-break: keep-all; }
+  .rank-bar-wrap { width: 120px; }
+  .rank-bar {
+    height: 6px;
+    border-radius: 3px;
+    background: var(--border);
+    overflow: hidden;
+  }
+  .rank-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+  }
+  .rank-count { font-size: 0.78rem; color: var(--sub); margin-top: 2px; text-align: right; }
+  .rank-value { font-family: 'Black Han Sans', sans-serif; color: var(--accent); font-size: 0.95rem; flex-shrink: 0; }
+
+  /* CHART */
+  .chart-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 120px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .bar {
+    width: 100%;
+    border-radius: 4px 4px 0 0;
+    transition: height 0.5s ease;
+    min-height: 2px;
+  }
+  .bar-label { font-size: 0.6rem; color: var(--sub); }
+
+  /* MOOD METER */
+  .mood-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .mood-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+  .mood-label { width: 80px; font-size: 0.82rem; color: var(--sub); flex-shrink: 0; }
+  .mood-bar-wrap { flex: 1; }
+  .mood-bar { height: 18px; border-radius: 9px; background: var(--border); overflow: hidden; }
+  .mood-fill { height: 100%; border-radius: 9px; transition: width 0.5s ease; }
+  .mood-pct { font-size: 0.78rem; color: var(--text); width: 36px; text-align: right; }
+
+  /* HOT DAYS */
+  .hot-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+  @media (max-width: 600px) { .hot-grid { grid-template-columns: 1fr; } }
+  .hot-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  }
+  .hot-rank { font-size: 1.5rem; margin-bottom: 8px; }
+  .hot-date { font-family: 'Black Han Sans', sans-serif; font-size: 1rem; color: var(--accent2); }
+  .hot-count { color: var(--accent); font-family: 'Black Han Sans', sans-serif; font-size: 1.3rem; }
+  .hot-sub { color: var(--sub); font-size: 0.72rem; margin-top: 2px; }
+
+  /* WEEKDAY */
+  .weekday-row { display: flex; gap: 6px; align-items: flex-end; height: 100px; }
+  .wd-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; justify-content: flex-end; }
+  .wd-bar { width: 100%; border-radius: 6px 6px 0 0; }
+  .wd-label { font-size: 0.72rem; color: var(--sub); }
+  .wd-count { font-size: 0.6rem; color: var(--sub); }
+
+  /* HOUR CHART */
+  .hour-chart { display: flex; gap: 3px; align-items: flex-end; height: 80px; }
+  .hour-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px; justify-content: flex-end; }
+  .hour-bar { width: 100%; border-radius: 3px 3px 0 0; min-height: 2px; }
+  .hour-label { font-size: 0.5rem; color: var(--sub); }
+
+  /* TWO COLS */
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 32px; }
+  @media (max-width: 700px) { .two-col { grid-template-columns: 1fr; } }
+  .two-col .section { margin-bottom: 0; }
+
+  /* CHARACTER */
+  .character-card {
+    background: linear-gradient(135deg, #fff5f0, #f8f0ff);
+    border: 1.5px solid var(--accent);
+    border-radius: 16px;
+    padding: 24px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(232,92,31,0.08);
+  }
+  .character-emoji { font-size: 3rem; margin-bottom: 12px; }
+  .character-title {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 1.3rem;
+    color: var(--accent);
+    margin-bottom: 8px;
+  }
+  .character-desc { color: var(--sub); font-size: 0.85rem; line-height: 1.6; word-break: keep-all; }
+
+  /* LEVEL BADGE */
+  .level-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    margin-left: 6px;
+  }
+  .lv-bronze { background: #f5e6d0; color: #8B4513; }
+  .lv-silver { background: #e0e0f0; color: #505070; }
+  .lv-gold { background: #fff3c0; color: #8B6914; }
+  .lv-diamond { background: #ede0ff; color: #6020a0; }
+  .lv-legend { background: linear-gradient(90deg,#e85c1f,#b87d00); color: #fff; }
+
+  .no-data { color: var(--sub); text-align: center; padding: 40px; font-size: 0.9rem; }
+
+  /* FOOTER */
+  .footer { text-align: center; color: var(--sub); font-size: 0.72rem; padding: 24px; border-top: 1px solid var(--border); margin-top: 32px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-title">🍻 강남벙 채팅 분석기</div>
+  <div class="header-sub">선릉·역삼 동네친구들 | 2026.02.20 ~ 2026.05.02</div>
+</div>
+
+<div class="filter-bar">
+  <span class="filter-label">📅 기간 선택</span>
+  <button class="preset-btn" onclick="setPreset('all')">전체기간</button>
+  <button class="preset-btn" onclick="setPreset('last7')">최근 7일</button>
+  <button class="preset-btn" onclick="setPreset('last30')">최근 30일</button>
+  <button class="preset-btn" onclick="setPreset('feb')">2월</button>
+  <button class="preset-btn" onclick="setPreset('mar')">3월</button>
+  <button class="preset-btn" onclick="setPreset('apr')">4월</button>
+  <div class="date-inputs">
+    <input type="date" id="startDate" value="2026-02-20" min="2026-02-20" max="2026-05-02">
+    <span style="color:var(--sub)">~</span>
+    <input type="date" id="endDate" value="2026-05-02" min="2026-02-20" max="2026-05-02">
+    <button class="apply-btn" onclick="applyFilter()">적용</button>
+  </div>
+</div>
+
+<div class="main" id="mainContent"></div>
+
+<div class="footer">💡 카카오톡 오픈채팅방 데이터 분석 | 키워드 기반 분류 | 이모티콘·시스템 메시지 제외</div>
+
+<script>
+const RAW = {"total_messages":187733,"total_users":163,"date_range":{"start":"2026-02-20","end":"2026-05-02"},"users":[{"name":"초코 강남 여 82","total":15696,"drink":304,"food":587,"meet":195,"board":15,"movie":25,"night":1183,"weekend":4751,"early":1391,"avg_len":9.8,"active_days":71,"peak_hour":13},{"name":"조기복 역삼 남 88","total":14763,"drink":232,"food":284,"meet":226,"board":45,"movie":25,"night":3534,"weekend":2743,"early":388,"avg_len":8.0,"active_days":41,"peak_hour":22},{"name":"하늘 양재 여 89","total":11512,"drink":251,"food":538,"meet":481,"board":74,"movie":29,"night":186,"weekend":2516,"early":235,"avg_len":17.5,"active_days":41,"peak_hour":10},{"name":"채채 삼성 여 87 💛","total":11399,"drink":137,"food":384,"meet":150,"board":25,"movie":13,"night":1741,"weekend":2325,"early":259,"avg_len":16.8,"active_days":70,"peak_hour":18},{"name":"단비 선릉 여 94","total":9604,"drink":153,"food":248,"meet":201,"board":40,"movie":23,"night":1641,"weekend":1759,"early":54,"avg_len":12.0,"active_days":66,"peak_hour":18},{"name":"헬로 선릉 여 87 🤍","total":9114,"drink":146,"food":360,"meet":139,"board":34,"movie":17,"night":2147,"weekend":2117,"early":99,"avg_len":12.8,"active_days":72,"peak_hour":23},{"name":"우리 역삼 남 88","total":7877,"drink":260,"food":371,"meet":282,"board":12,"movie":14,"night":699,"weekend":2198,"early":193,"avg_len":11.9,"active_days":37,"peak_hour":23},{"name":"엘라 강남 여 83","total":6084,"drink":322,"food":315,"meet":163,"board":17,"movie":23,"night":83,"weekend":571,"early":381,"avg_len":18.5,"active_days":31,"peak_hour":16},{"name":"새미 선정릉 여 85","total":6035,"drink":69,"food":158,"meet":181,"board":37,"movie":35,"night":1799,"weekend":994,"early":373,"avg_len":10.8,"active_days":53,"peak_hour":22},{"name":"여행러 역삼 84 남🤍","total":5722,"drink":147,"food":188,"meet":193,"board":4,"movie":9,"night":221,"weekend":858,"early":451,"avg_len":12.7,"active_days":69,"peak_hour":13},{"name":"보라 삼성 여 82","total":3861,"drink":103,"food":234,"meet":135,"board":8,"movie":3,"night":400,"weekend":841,"early":78,"avg_len":12.6,"active_days":68,"peak_hour":22},{"name":"록키 논현 남 82","total":3815,"drink":36,"food":106,"meet":62,"board":9,"movie":4,"night":1229,"weekend":961,"early":379,"avg_len":5.4,"active_days":41,"peak_hour":20},{"name":"제인 강남 남 82","total":3596,"drink":130,"food":157,"meet":153,"board":27,"movie":10,"night":257,"weekend":557,"early":27,"avg_len":18.6,"active_days":59,"peak_hour":11},{"name":"티븨 역삼 여 94","total":3546,"drink":46,"food":226,"meet":60,"board":11,"movie":3,"night":322,"weekend":772,"early":132,"avg_len":11.3,"active_days":57,"peak_hour":22},{"name":"민호 논현 남 85","total":3348,"drink":83,"food":99,"meet":100,"board":3,"movie":2,"night":696,"weekend":1493,"early":82,"avg_len":11.8,"active_days":68,"peak_hour":17},{"name":"제이 서초 여 94","total":3284,"drink":44,"food":98,"meet":40,"board":6,"movie":7,"night":109,"weekend":421,"early":41,"avg_len":12.7,"active_days":24,"peak_hour":16},{"name":"푸름 개포 남 92","total":3167,"drink":75,"food":126,"meet":48,"board":2,"movie":14,"night":832,"weekend":729,"early":161,"avg_len":9.9,"active_days":46,"peak_hour":20},{"name":"엑서 논현 남 88","total":3122,"drink":117,"food":150,"meet":148,"board":10,"movie":4,"night":278,"weekend":871,"early":99,"avg_len":16.1,"active_days":72,"peak_hour":20},{"name":"룰루 대치 남 82","total":2852,"drink":91,"food":135,"meet":65,"board":2,"movie":4,"night":221,"weekend":923,"early":157,"avg_len":11.0,"active_days":39,"peak_hour":17},{"name":"유삡뺩 선릉 남 98","total":2836,"drink":89,"food":68,"meet":54,"board":1,"movie":0,"night":67,"weekend":517,"early":48,"avg_len":14.7,"active_days":44,"peak_hour":22},{"name":"충재 역삼 남 81","total":2613,"drink":35,"food":121,"meet":74,"board":1,"movie":18,"night":198,"weekend":711,"early":483,"avg_len":12.1,"active_days":55,"peak_hour":9},{"name":"달콤 강남 여 77 🤍","total":2609,"drink":22,"food":115,"meet":19,"board":0,"movie":0,"night":38,"weekend":969,"early":331,"avg_len":14.6,"active_days":55,"peak_hour":14},{"name":"소소 대치 남 87 🤍","total":2447,"drink":67,"food":87,"meet":27,"board":3,"movie":1,"night":24,"weekend":107,"early":9,"avg_len":11.2,"active_days":14,"peak_hour":10},{"name":"햇반 선릉 여 89","total":2432,"drink":69,"food":136,"meet":110,"board":24,"movie":14,"night":501,"weekend":707,"early":61,"avg_len":14.6,"active_days":53,"peak_hour":1},{"name":"쪼미 강남 여 91","total":2331,"drink":95,"food":132,"meet":88,"board":23,"movie":8,"night":602,"weekend":800,"early":32,"avg_len":11.8,"active_days":17,"peak_hour":13},{"name":"식빵 86 선릉 남","total":2193,"drink":26,"food":43,"meet":42,"board":44,"movie":7,"night":274,"weekend":616,"early":21,"avg_len":9.9,"active_days":67,"peak_hour":22},{"name":"모리 대치 남 86","total":2123,"drink":44,"food":102,"meet":24,"board":26,"movie":4,"night":333,"weekend":324,"early":13,"avg_len":10.6,"active_days":44,"peak_hour":18},{"name":"제또 역삼 남 99 🤍","total":2059,"drink":27,"food":51,"meet":33,"board":1,"movie":0,"night":189,"weekend":312,"early":16,"avg_len":7.1,"active_days":33,"peak_hour":21},{"name":"반짝 역삼 여 81","total":2056,"drink":58,"food":109,"meet":96,"board":3,"movie":8,"night":46,"weekend":601,"early":72,"avg_len":13.0,"active_days":62,"peak_hour":10},{"name":"블랙 논현 남 86","total":2006,"drink":83,"food":66,"meet":78,"board":3,"movie":7,"night":82,"weekend":720,"early":26,"avg_len":12.1,"active_days":63,"peak_hour":13},{"name":"소나 역삼 여 86","total":1976,"drink":30,"food":86,"meet":26,"board":6,"movie":14,"night":810,"weekend":638,"early":81,"avg_len":9.6,"active_days":68,"peak_hour":4},{"name":"규오 삼성 남 81","total":1968,"drink":60,"food":150,"meet":121,"board":2,"movie":4,"night":25,"weekend":190,"early":14,"avg_len":13.3,"active_days":61,"peak_hour":16},{"name":"짱구 선릉 남 88","total":1913,"drink":16,"food":46,"meet":33,"board":3,"movie":5,"night":490,"weekend":386,"early":36,"avg_len":13.1,"active_days":67,"peak_hour":23},{"name":"브이 개포 남 83","total":1800,"drink":71,"food":37,"meet":47,"board":0,"movie":0,"night":93,"weekend":587,"early":34,"avg_len":9.7,"active_days":33,"peak_hour":20},{"name":"구름 역삼 여 86","total":1776,"drink":75,"food":40,"meet":65,"board":3,"movie":1,"night":199,"weekend":468,"early":25,"avg_len":10.0,"active_days":58,"peak_hour":20},{"name":"카스 서초 남 82","total":1692,"drink":43,"food":86,"meet":20,"board":1,"movie":0,"night":67,"weekend":84,"early":65,"avg_len":10.8,"active_days":59,"peak_hour":10},{"name":"바우 선릉 남 90","total":1486,"drink":44,"food":47,"meet":28,"board":7,"movie":0,"night":286,"weekend":436,"early":0,"avg_len":8.3,"active_days":37,"peak_hour":14},{"name":"인사하는 춘식이","total":1458,"drink":64,"food":50,"meet":57,"board":2,"movie":1,"night":420,"weekend":388,"early":11,"avg_len":10.7,"active_days":13,"peak_hour":0},{"name":"호호 역삼 남 80","total":958,"drink":26,"food":39,"meet":35,"board":3,"movie":0,"night":237,"weekend":302,"early":3,"avg_len":15.0,"active_days":69,"peak_hour":11},{"name":"한강 선릉 남 84","total":949,"drink":14,"food":38,"meet":29,"board":1,"movie":0,"night":48,"weekend":305,"early":68,"avg_len":14.6,"active_days":56,"peak_hour":13},{"name":"태환 대치 남 88","total":888,"drink":51,"food":21,"meet":28,"board":8,"movie":1,"night":155,"weekend":240,"early":0,"avg_len":12.5,"active_days":53,"peak_hour":21},{"name":"구구 선릉 남 83","total":777,"drink":6,"food":43,"meet":28,"board":1,"movie":0,"night":0,"weekend":108,"early":25,"avg_len":15.0,"active_days":21,"peak_hour":20},{"name":"이슨 강남 남 85","total":771,"drink":55,"food":12,"meet":25,"board":0,"movie":0,"night":110,"weekend":316,"early":0,"avg_len":10.7,"active_days":25,"peak_hour":14},{"name":"산뽀 언주 남 86","total":771,"drink":12,"food":50,"meet":18,"board":0,"movie":2,"night":69,"weekend":288,"early":25,"avg_len":8.0,"active_days":57,"peak_hour":22},{"name":"가을 강남 남 83","total":673,"drink":19,"food":35,"meet":10,"board":1,"movie":1,"night":40,"weekend":293,"early":0,"avg_len":15.6,"active_days":14,"peak_hour":19},{"name":"흥 역삼 남 94","total":665,"drink":19,"food":19,"meet":14,"board":1,"movie":0,"night":136,"weekend":159,"early":0,"avg_len":11.0,"active_days":34,"peak_hour":22},{"name":"지니 양재 여 89","total":641,"drink":20,"food":15,"meet":9,"board":1,"movie":0,"night":5,"weekend":123,"early":14,"avg_len":9.8,"active_days":7,"peak_hour":20},{"name":"리라 강남 여 90","total":611,"drink":3,"food":4,"meet":17,"board":0,"movie":0,"night":15,"weekend":20,"early":40,"avg_len":7.0,"active_days":2,"peak_hour":13},{"name":"서연 선릉 여 89","total":596,"drink":15,"food":25,"meet":37,"board":1,"movie":1,"night":69,"weekend":137,"early":0,"avg_len":12.1,"active_days":13,"peak_hour":20},{"name":"프벨 선릉 남 95","total":593,"drink":23,"food":65,"meet":18,"board":1,"movie":0,"night":20,"weekend":99,"early":16,"avg_len":12.5,"active_days":35,"peak_hour":22},{"name":"푸우 강남 남 97 0428","total":566,"drink":8,"food":15,"meet":10,"board":2,"movie":3,"night":73,"weekend":3,"early":119,"avg_len":6.4,"active_days":5,"peak_hour":16},{"name":"동글 강남 남 93 0415","total":543,"drink":32,"food":74,"meet":20,"board":4,"movie":1,"night":3,"weekend":40,"early":0,"avg_len":22.9,"active_days":10,"peak_hour":18},{"name":"나미 삼성 남 81 💛","total":542,"drink":9,"food":25,"meet":3,"board":0,"movie":0,"night":108,"weekend":118,"early":3,"avg_len":8.9,"active_days":38,"peak_hour":20},{"name":"코난 대치 남 91","total":537,"drink":1,"food":22,"meet":19,"board":0,"movie":0,"night":24,"weekend":124,"early":25,"avg_len":16.5,"active_days":60,"peak_hour":11},{"name":"햅뻔 논현 여 88 🤍","total":511,"drink":19,"food":69,"meet":18,"board":1,"movie":0,"night":21,"weekend":105,"early":29,"avg_len":18.8,"active_days":61,"peak_hour":11},{"name":"블루 논현 남 91 0305","total":460,"drink":26,"food":25,"meet":11,"board":0,"movie":0,"night":204,"weekend":138,"early":18,"avg_len":19.0,"active_days":15,"peak_hour":4},{"name":"쮀이 삼성 남 84","total":442,"drink":18,"food":47,"meet":14,"board":1,"movie":0,"night":19,"weekend":139,"early":9,"avg_len":14.1,"active_days":23,"peak_hour":20},{"name":"쿼트 삼성 남 86","total":400,"drink":30,"food":24,"meet":19,"board":7,"movie":0,"night":5,"weekend":20,"early":23,"avg_len":15.9,"active_days":8,"peak_hour":19},{"name":"호두 역삼 남 93 🤍","total":388,"drink":9,"food":19,"meet":12,"board":0,"movie":0,"night":216,"weekend":92,"early":1,"avg_len":10.6,"active_days":53,"peak_hour":2},{"name":"식물 서초 남 92","total":377,"drink":21,"food":14,"meet":10,"board":0,"movie":0,"night":73,"weekend":49,"early":2,"avg_len":8.1,"active_days":25,"peak_hour":21},{"name":"미유 서초 여 95","total":353,"drink":57,"food":75,"meet":58,"board":0,"movie":6,"night":121,"weekend":138,"early":39,"avg_len":1075.2,"active_days":67,"peak_hour":4},{"name":"디귿 선정릉 남 86","total":343,"drink":6,"food":15,"meet":12,"board":0,"movie":0,"night":55,"weekend":89,"early":14,"avg_len":7.8,"active_days":41,"peak_hour":23},{"name":"허니 선릉 여 88 0214","total":337,"drink":8,"food":15,"meet":26,"board":0,"movie":1,"night":44,"weekend":147,"early":2,"avg_len":12.1,"active_days":12,"peak_hour":23}],"date_data":{"2026-02-20":2596,"2026-02-21":3176,"2026-02-22":2541,"2026-02-23":3317,"2026-02-24":3253,"2026-02-25":3139,"2026-02-26":1897,"2026-02-27":3117,"2026-02-28":2146,"2026-03-01":2382,"2026-03-02":2719,"2026-03-03":2232,"2026-03-04":2472,"2026-03-05":4925,"2026-03-06":3154,"2026-03-07":2064,"2026-03-08":1415,"2026-03-09":2704,"2026-03-10":1511,"2026-03-11":3687,"2026-03-12":3645,"2026-03-13":2595,"2026-03-14":2365,"2026-03-15":1114,"2026-03-16":2547,"2026-03-17":3020,"2026-03-18":2861,"2026-03-19":1277,"2026-03-20":566,"2026-03-21":1220,"2026-03-22":1416,"2026-03-23":1294,"2026-03-24":3244,"2026-03-25":3405,"2026-03-26":2167,"2026-03-27":1485,"2026-03-28":1664,"2026-03-29":2053,"2026-03-30":4297,"2026-03-31":2164,"2026-04-01":2442,"2026-04-02":4161,"2026-04-03":2936,"2026-04-04":2732,"2026-04-05":2495,"2026-04-06":3179,"2026-04-07":2187,"2026-04-08":2753,"2026-04-09":2658,"2026-04-10":4851,"2026-04-11":2305,"2026-04-12":1893,"2026-04-13":4031,"2026-04-14":3984,"2026-04-15":3693,"2026-04-16":2641,"2026-04-17":2921,"2026-04-18":2916,"2026-04-19":2078,"2026-04-20":2527,"2026-04-21":2113,"2026-04-22":2332,"2026-04-23":1871,"2026-04-24":3149,"2026-04-25":2362,"2026-04-26":2602,"2026-04-27":3027,"2026-04-28":3867,"2026-04-29":3122,"2026-04-30":3031,"2026-05-01":1908,"2026-05-02":120},"hour_data":{"0":8183,"1":6302,"2":4536,"3":3009,"4":2672,"5":1385,"6":1440,"7":1717,"8":3846,"9":4900,"10":8871,"11":9105,"12":7142,"13":10053,"14":10722,"15":8589,"16":9341,"17":11474,"18":13159,"19":11802,"20":12349,"21":11406,"22":14236,"23":11494},"weekday_data":{"0":29642,"1":27575,"2":29906,"3":28273,"4":29278,"5":23070,"6":19989},"keyword_totals":{"drink":4395,"food":7354,"meet":4719,"board":591,"movie":380}};
+
+let currentStart = '2026-02-20';
+let currentEnd = '2026-05-02';
+
+function parseDate(s) { return new Date(s); }
+function fmtDate(s) {
+  const d = new Date(s);
+  return `${d.getMonth()+1}/${d.getDate()}`;
+}
+function fmtDateFull(s) {
+  const d = new Date(s);
+  const days = ['일','월','화','수','목','금','토'];
+  return `${d.getMonth()+1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+}
+
+function inRange(dateStr, start, end) {
+  return dateStr >= start && dateStr <= end;
+}
+
+function filterData(start, end) {
+  const dateData = {};
+  let total = 0;
+  const wdCount = {0:0,1:0,2:0,3:0,4:0,5:0,6:0};
+  for (const [d, c] of Object.entries(RAW.date_data)) {
+    if (d >= start && d <= end) {
+      dateData[d] = c;
+      total += c;
+      const wd = new Date(d).getDay();
+      wdCount[wd] = (wdCount[wd]||0) + c;
+    }
+  }
+
+  const totalDays = Object.keys(RAW.date_data).length;
+  const rangedDays = Object.keys(dateData).length;
+  const ratio = totalDays > 0 ? rangedDays / totalDays : 1;
+
+  const users = RAW.users.map(u => {
+    if (start === '2026-02-20' && end === '2026-05-02') return {...u};
+    return {
+      ...u,
+      total: Math.round(u.total * ratio),
+      drink: Math.round(u.drink * ratio),
+      food: Math.round(u.food * ratio),
+      meet: Math.round(u.meet * ratio),
+      board: Math.round(u.board * ratio),
+      movie: Math.round(u.movie * ratio),
+      night: Math.round(u.night * ratio),
+      weekend: Math.round(u.weekend * ratio),
+      early: Math.round(u.early * ratio),
+    };
+  }).filter(u => u.total > 0).sort((a,b) => b.total - a.total);
+
+  const kw = {
+    drink: Math.round(RAW.keyword_totals.drink * ratio),
+    food: Math.round(RAW.keyword_totals.food * ratio),
+    meet: Math.round(RAW.keyword_totals.meet * ratio),
+    board: Math.round(RAW.keyword_totals.board * ratio),
+    movie: Math.round(RAW.keyword_totals.movie * ratio),
+  };
+
+  return { dateData, total, users, wdCount, kw, ratio };
+}
+
+function getLevel(total) {
+  if (total >= 5000) return {label:'🔥 레전드', cls:'lv-legend'};
+  if (total >= 2000) return {label:'💎 다이아', cls:'lv-diamond'};
+  if (total >= 500)  return {label:'🥇 골드', cls:'lv-gold'};
+  if (total >= 100)  return {label:'🥈 실버', cls:'lv-silver'};
+  return {label:'🥉 브론즈', cls:'lv-bronze'};
+}
+
+function getCharacter(data) {
+  const {total, kw, wdCount} = data;
+  const drinkRatio = kw.drink / Math.max(total,1);
+  if (drinkRatio > 0.015) return {emoji:'🍻', title:'이 채팅방은 술을 사랑하는 사람들의 모임!', desc:'맥주, 소주, 이자카야… 술 얘기가 끊이질 않는 강남 최고의 주당 집합소. 퇴근 후 자연스럽게 "오늘 한잔?" 이 나오는 곳.'};
+  if (kw.food > kw.drink * 2) return {emoji:'🍽️', title:'강남 맛집 데이터베이스 채팅방', desc:'밥 얘기, 식당 얘기, 맛집 추천이 넘쳐나는 곳. 여기 멤버들한테 물어보면 강남 맛집 다 나온다는 소문이 있음.'};
+  return {emoji:'🔥', title:'강남에서 제일 핫한 모임 채팅방', desc:'번개, 벙개, 모임 제안이 수시로 올라오는 활발한 채팅방. 심심한 날에 여기 들어오면 뭔가 생긴다는 진리.'};
+}
+
+async function downloadSection(id, filename) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  const btn = el.querySelector('.dl-btn');
+  if (btn) btn.style.visibility = 'hidden';
+  try {
+    const canvas = await html2canvas(el, {
+      backgroundColor: '#ffffff',
+      scale: 2,
+      useCORS: true,
+      logging: false,
+    });
+    const link = document.createElement('a');
+    link.download = filename;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+  } finally {
+    if (btn) btn.style.visibility = '';
+  }
+}
+
+function render() {
+  const data = filterData(currentStart, currentEnd);
+  const {dateData, total, users, wdCount, kw} = data;
+  const dateKeys = Object.keys(dateData).sort();
+  const maxDate = Math.max(...Object.values(dateData));
+  const hotDays = [...Object.entries(dateData)].sort((a,b)=>b[1]-a[1]).slice(0,3);
+  const char = getCharacter(data);
+  const period = `${currentStart.replace(/-/g,'')}_${currentEnd.replace(/-/g,'')}`;
+
+  const sortBy = (key) => [...users].sort((a,b) => b[key] - a[key]);
+  const badges = [
+    {emoji:'💬', title:'수다의 제왕', name: users[0]?.name, desc: `총 ${(users[0]?.total||0).toLocaleString()}개 메시지`},
+    {emoji:'🍻', title:'술자리 소환사', name: sortBy('drink')[0]?.name, desc:`술 언급 ${(sortBy('drink')[0]?.drink||0)}회`},
+    {emoji:'🍽️', title:'맛집 탐정', name: sortBy('food')[0]?.name, desc:`음식 언급 ${(sortBy('food')[0]?.food||0)}회`},
+    {emoji:'⚡', title:'번개의 신', name: sortBy('meet')[0]?.name, desc:`모임 제안 ${(sortBy('meet')[0]?.meet||0)}회`},
+    {emoji:'🦉', title:'강남 올빼미', name: sortBy('night')[0]?.name, desc:`새벽 메시지 ${(sortBy('night')[0]?.night||0)}개`},
+    {emoji:'🎲', title:'보드게임 전도사', name: sortBy('board')[0]?.name, desc:`보드게임 언급 ${(sortBy('board')[0]?.board||0)}회`},
+    {emoji:'🎬', title:'시네마 천국', name: sortBy('movie')[0]?.name, desc:`영화 언급 ${(sortBy('movie')[0]?.movie||0)}회`},
+    {emoji:'📅', title:'주말 불꽃러', name: sortBy('weekend')[0]?.name, desc:`주말 메시지 ${(sortBy('weekend')[0]?.weekend||0)}개`},
+    {emoji:'🌅', title:'강남 얼리버드', name: sortBy('early')[0]?.name, desc:`아침 메시지 ${(sortBy('early')[0]?.early||0)}개`},
+    {emoji:'🫥', title:'신비주의 멤버', name: [...users].sort((a,b)=>a.total-b.total).find(u=>u.total>0)?.name, desc:`조용한 관망파`},
+    {emoji:'✍️', title:'글쟁이', name: [...users].filter(u=>u.avg_len<1000).sort((a,b)=>b.avg_len-a.avg_len)[0]?.name, desc:`평균 ${[...users].filter(u=>u.avg_len<1000).sort((a,b)=>b.avg_len-a.avg_len)[0]?.avg_len}자`},
+    {emoji:'⚡', title:'단문의 달인', name: [...users].filter(u=>u.total>50).sort((a,b)=>a.avg_len-b.avg_len)[0]?.name, desc:`평균 ${[...users].filter(u=>u.total>50).sort((a,b)=>a.avg_len-b.avg_len)[0]?.avg_len}자`},
+  ];
+
+  const hourMax = Math.max(...Object.values(RAW.hour_data));
+  const hourBars = Array.from({length:24},(_,i) => {
+    const v = Math.round((RAW.hour_data[String(i)]||0) * data.ratio);
+    const pct = Math.round(v/hourMax*100);
+    const isNight = i>=0&&i<6;
+    const isPeak = i>=17&&i<=23;
+    return `<div class="hour-col">
+      <div class="hour-bar" style="height:${Math.max(pct,2)}%;background:${isNight?'#9b5de5':isPeak?'#e85c1f':'#118ab2'}"></div>
+      <div class="hour-label">${i}시</div>
+    </div>`;
+  }).join('');
+
+  const wdNames = ['월','화','수','목','금','토','일'];
+  const wdColors = ['#118ab2','#118ab2','#118ab2','#118ab2','#06d6a0','#e85c1f','#e85c1f'];
+  const wdMax = Math.max(...Object.values(wdCount));
+  const wdBars = [1,2,3,4,5,6,0].map((i,idx) => {
+    const v = wdCount[i]||0;
+    const pct = wdMax>0 ? Math.round(v/wdMax*100) : 0;
+    return `<div class="wd-col">
+      <div class="wd-count">${v>0?v.toLocaleString():''}</div>
+      <div class="wd-bar" style="height:${Math.max(pct,4)}%;background:${wdColors[idx]};border-radius:6px 6px 0 0;width:100%"></div>
+      <div class="wd-label">${wdNames[i]}</div>
+    </div>`;
+  }).join('');
+
+  const dMax = Math.max(...Object.values(dateData), 1);
+  const dateBars = dateKeys.map((d,i) => {
+    const v = dateData[d];
+    const pct = Math.round(v/dMax*100);
+    const isWeekend = [0,6].includes(new Date(d).getDay());
+    return `<div class="bar-col" title="${fmtDateFull(d)}: ${v.toLocaleString()}개">
+      <div class="bar" style="height:${Math.max(pct,2)}%;background:${isWeekend?'#b87d00':'#0e72a0'}"></div>
+      ${dateKeys.length <= 14 ? `<div class="bar-label">${fmtDate(d)}</div>` : (i%7===0?`<div class="bar-label">${fmtDate(d)}</div>`:'<div class="bar-label"></div>')}
+    </div>`;
+  }).join('');
+
+  const kwTotal = kw.drink + kw.food + kw.meet + kw.board + kw.movie;
+  const moodItems = [
+    {label:'🍻 술모드', val:kw.drink, color:'#e85c1f'},
+    {label:'🍽️ 식사모드', val:kw.food, color:'#06d6a0'},
+    {label:'⚡ 번개모드', val:kw.meet, color:'#b87d00'},
+    {label:'🎲 게임모드', val:kw.board, color:'#9b5de5'},
+    {label:'🎬 영화모드', val:kw.movie, color:'#118ab2'},
+  ];
+  const moodRows = moodItems.map(m => {
+    const pct = kwTotal>0 ? Math.round(m.val/kwTotal*100) : 0;
+    return `<div class="mood-row">
+      <div class="mood-label">${m.label}</div>
+      <div class="mood-bar-wrap">
+        <div class="mood-bar"><div class="mood-fill" style="width:${pct}%;background:${m.color}"></div></div>
+      </div>
+      <div class="mood-pct">${pct}%</div>
+    </div>`;
+  }).join('');
+
+  const top10 = users.slice(0,10);
+  const maxMsg = top10[0]?.total || 1;
+  const rankItems = top10.map((u,i) => {
+    const lv = getLevel(u.total);
+    const pct = Math.round(u.total/maxMsg*100);
+    const medals = ['🥇','🥈','🥉','4️⃣','5️⃣','6️⃣','7️⃣','8️⃣','9️⃣','🔟'];
+    return `<div class="rank-item">
+      <div class="rank-num rank-${i+1}">${medals[i]}</div>
+      <div class="rank-name">${u.name}<span class="level-badge ${lv.cls}">${lv.label}</span></div>
+      <div class="rank-bar-wrap">
+        <div class="rank-bar"><div class="rank-bar-fill" style="width:${pct}%"></div></div>
+        <div class="rank-count">${u.total.toLocaleString()}개</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const hotCards = hotDays.map(([d,c], i) => {
+    const emojis = ['🔥','💥','⚡'];
+    return `<div class="hot-card">
+      <div class="hot-rank">${emojis[i]}</div>
+      <div class="hot-date">${fmtDateFull(d)}</div>
+      <div class="hot-count">${c.toLocaleString()}개</div>
+      <div class="hot-sub">메시지 폭발</div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('mainContent').innerHTML = `
+    <div class="period-title">
+      <h2>📊 ${fmtDateFull(currentStart)} ~ ${fmtDateFull(currentEnd)}</h2>
+      <p>${dateKeys.length}일간의 기록 분석 완료</p>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-card">
+        <div class="stat-icon">💬</div>
+        <div class="stat-value">${total.toLocaleString()}</div>
+        <div class="stat-label">총 메시지</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">👥</div>
+        <div class="stat-value">${users.length}</div>
+        <div class="stat-label">활성 멤버</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🍻</div>
+        <div class="stat-value">${kw.drink.toLocaleString()}</div>
+        <div class="stat-label">술 언급 횟수</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">⚡</div>
+        <div class="stat-value">${kw.meet.toLocaleString()}</div>
+        <div class="stat-label">번개 제안 횟수</div>
+      </div>
+    </div>
+
+    <div class="section" id="sec-badge">
+      <div class="section-header">
+        <div class="section-title">🎖️ 이 기간 수여되는 뱃지 <span>각 분야 1위에게 수여</span></div>
+        <button class="dl-btn" onclick="downloadSection('sec-badge', '강남벙_뱃지_${period}.png')">📥 이미지 저장</button>
+      </div>
+      <div class="badge-grid">
+        ${badges.map(b => b.name ? `<div class="badge-card">
+          <div class="badge-emoji">${b.emoji}</div>
+          <div class="badge-info">
+            <div class="badge-title">${b.title}</div>
+            <div class="badge-name">${b.name}</div>
+            <div class="badge-desc">${b.desc}</div>
+          </div>
+        </div>` : '').join('')}
+      </div>
+    </div>
+
+    <div class="section" id="sec-ranking">
+      <div class="section-header">
+        <div class="section-title">🏆 메시지 명예의 전당 <span>Top 10</span></div>
+        <button class="dl-btn" onclick="downloadSection('sec-ranking', '강남벙_랭킹_${period}.png')">📥 이미지 저장</button>
+      </div>
+      <div class="ranking-list">${rankItems}</div>
+    </div>
+
+    <div class="section" id="sec-hotdays">
+      <div class="section-header">
+        <div class="section-title">🔥 채팅 폭발했던 날 Top 3</div>
+        <button class="dl-btn" onclick="downloadSection('sec-hotdays', '강남벙_핫한날_${period}.png')">📥 이미지 저장</button>
+      </div>
+      <div class="hot-grid">${hotCards}</div>
+    </div>
+
+    <div class="two-col">
+      <div class="section" id="sec-weekday">
+        <div class="section-header">
+          <div class="section-title">📅 요일별 채팅량</div>
+          <button class="dl-btn" onclick="downloadSection('sec-weekday', '강남벙_요일별_${period}.png')">📥 이미지 저장</button>
+        </div>
+        <div class="chart-card">
+          <div class="weekday-row">${wdBars}</div>
+          <div style="margin-top:8px;font-size:0.72rem;color:var(--sub);text-align:center">🟠 주말&nbsp;&nbsp;🔵 주중&nbsp;&nbsp;🟢 금요일</div>
+        </div>
+      </div>
+      <div class="section" id="sec-mood">
+        <div class="section-header">
+          <div class="section-title">🌡️ 이 채팅방 모드 분석</div>
+          <button class="dl-btn" onclick="downloadSection('sec-mood', '강남벙_모드분석_${period}.png')">📥 이미지 저장</button>
+        </div>
+        <div class="mood-card">${moodRows}</div>
+      </div>
+    </div>
+
+    <div class="section" id="sec-hour">
+      <div class="section-header">
+        <div class="section-title">🕐 시간대별 채팅량 <span>밤 11~1시가 피크!</span></div>
+        <button class="dl-btn" onclick="downloadSection('sec-hour', '강남벙_시간대별_${period}.png')">📥 이미지 저장</button>
+      </div>
+      <div class="chart-card">
+        <div class="hour-chart">${hourBars}</div>
+        <div style="margin-top:8px;font-size:0.72rem;color:var(--sub);text-align:center">🟣 새벽(0-5시)&nbsp;&nbsp;🔵 낮(6-16시)&nbsp;&nbsp;🟠 저녁(17-23시)</div>
+      </div>
+    </div>
+
+    <div class="section" id="sec-daily">
+      <div class="section-header">
+        <div class="section-title">📈 일별 채팅량 추이</div>
+        <button class="dl-btn" onclick="downloadSection('sec-daily', '강남벙_일별추이_${period}.png')">📥 이미지 저장</button>
+      </div>
+      <div class="chart-card">
+        <div class="bar-chart" style="height:140px">${dateBars}</div>
+        <div style="margin-top:8px;font-size:0.72rem;color:var(--sub);text-align:center">🟡 주말&nbsp;&nbsp;🔵 평일&nbsp;&nbsp;(막대에 마우스 올리면 날짜 표시)</div>
+      </div>
+    </div>
+
+    <div class="section" id="sec-char">
+      <div class="section-header">
+        <div class="section-title">🎭 이 채팅방의 캐릭터</div>
+        <button class="dl-btn" onclick="downloadSection('sec-char', '강남벙_캐릭터_${period}.png')">📥 이미지 저장</button>
+      </div>
+      <div class="character-card">
+        <div class="character-emoji">${char.emoji}</div>
+        <div class="character-title">${char.title}</div>
+        <div class="character-desc">${char.desc}</div>
+      </div>
+    </div>
+  `;
+}
+
+function setPreset(p) {
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  const all = Object.keys(RAW.date_data).sort();
+  const last = all[all.length-1];
+  const first = all[0];
+  if (p==='all') { currentStart=first; currentEnd=last; }
+  else if (p==='last7') {
+    const d = new Date(last); d.setDate(d.getDate()-6);
+    currentStart = d.toISOString().slice(0,10); currentEnd=last;
+  }
+  else if (p==='last30') {
+    const d = new Date(last); d.setDate(d.getDate()-29);
+    currentStart = d.toISOString().slice(0,10); currentEnd=last;
+  }
+  else if (p==='feb') { currentStart='2026-02-20'; currentEnd='2026-02-28'; }
+  else if (p==='mar') { currentStart='2026-03-01'; currentEnd='2026-03-31'; }
+  else if (p==='apr') { currentStart='2026-04-01'; currentEnd='2026-04-30'; }
+  document.getElementById('startDate').value = currentStart;
+  document.getElementById('endDate').value = currentEnd;
+  render();
+}
+
+function applyFilter() {
+  document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+  currentStart = document.getElementById('startDate').value;
+  currentEnd = document.getElementById('endDate').value;
+  if (currentStart > currentEnd) { alert('시작일이 종료일보다 늦을 수 없어요!'); return; }
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
