@@ -292,7 +292,7 @@
     box-shadow: 0 1px 4px rgba(0,0,0,0.05);
   }
   .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 120px; }
-  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; justify-content: flex-end; }
   .bar { width: 100%; border-radius: 2px 2px 0 0; transition: height 0.5s ease; min-height: 2px; }
   .bar-label { font-size: 0.58rem; color: var(--sub); font-weight: 700; }
 
@@ -792,7 +792,7 @@ function render() {
     const isNight = i>=0&&i<6;
     const isPeak = i>=17&&i<=23;
     return `<div class="hour-col">
-      <div class="hour-bar" style="height:${Math.max(pct,2)}%;background:${isNight?'#9b5de5':isPeak?'#e85c1f':'#118ab2'}"></div>
+      <div class="hour-bar" style="height:${Math.max(Math.round(pct*0.66),2)}px;background:${isNight?'#9b5de5':isPeak?'#e85c1f':'#118ab2'}"></div>
       <div class="hour-label">${i}시</div>
     </div>`;
   }).join('');
@@ -805,7 +805,7 @@ function render() {
     const pct = wdMax>0 ? Math.round(v/wdMax*100) : 0;
     return `<div class="wd-col">
       <div class="wd-count">${v>0?v.toLocaleString():''}</div>
-      <div class="wd-bar" style="height:${Math.max(pct,4)}%;background:${wdColors[idx]};border-radius:6px 6px 0 0;width:100%"></div>
+      <div class="wd-bar" style="height:${Math.max(Math.round(pct*0.64),4)}px;background:${wdColors[idx]};border-radius:6px 6px 0 0;width:100%"></div>
       <div class="wd-label">${wdNames[i]}</div>
     </div>`;
   }).join('');
@@ -816,7 +816,7 @@ function render() {
     const pct = Math.round(v/dMax*100);
     const isWeekend = [0,6].includes(new Date(d).getDay());
     return `<div class="bar-col" title="${fmtDateFull(d)}: ${v.toLocaleString()}개">
-      <div class="bar" style="height:${Math.max(pct,2)}%;background:${isWeekend?'#b87d00':'#0e72a0'}"></div>
+      <div class="bar" style="height:${Math.max(Math.round(pct*1.24),2)}px;background:${isWeekend?'#b87d00':'#0e72a0'}"></div>
       ${dateKeys.length <= 14 ? `<div class="bar-label">${fmtDate(d)}</div>` : (i%7===0?`<div class="bar-label">${fmtDate(d)}</div>`:'<div class="bar-label"></div>')}
     </div>`;
   }).join('');
